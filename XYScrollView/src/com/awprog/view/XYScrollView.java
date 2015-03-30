@@ -172,7 +172,7 @@ public class XYScrollView extends FrameLayout{
 
 	/** The personnalized vertical scrollView. Here, we just need to ask
 	 * for child's event handling cancelation when entering to the scroll mode */
-	class MyVerticalScrollView extends ScrollView {
+	private class MyVerticalScrollView extends ScrollView {
 		public MyVerticalScrollView(Context context) {
 			super(context);
 		}
@@ -195,7 +195,7 @@ public class XYScrollView extends FrameLayout{
 	}
 	
 	/** This personnalized frameView will just stop the propagations of the events **/
-	class MyFrameLayoutIntermediate extends FrameLayout {
+	private class MyFrameLayoutIntermediate extends FrameLayout {
 		public MyFrameLayoutIntermediate(Context context) {
 			super(context);
 		}
@@ -214,7 +214,7 @@ public class XYScrollView extends FrameLayout{
 	}
 	
 	/** The personnalized HorizontalScrollView. Here, we apply the cancelation request **/
-	class MyHorizontalScrollView extends HorizontalScrollView {
+	private class MyHorizontalScrollView extends HorizontalScrollView {
 		public MyHorizontalScrollView(Context context) {
 			super(context);
 		}
