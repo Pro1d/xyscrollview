@@ -52,8 +52,16 @@ public class XYScrollView extends FrameLayout{
 	/** Build the structure of the view with the personnalized views **/
 	private void initScrolls() {
 		mVerticalScrollView = new MyVerticalScrollView(getContext());
+		mVerticalScrollView.setVerticalScrollBarEnabled(false);
+		mVerticalScrollView.setOverScrollMode(OVER_SCROLL_NEVER);
+		
 		mIntermediateFrame = new MyFrameLayoutIntermediate(getContext());
+		
 		mHorizontalScrollView = new MyHorizontalScrollView(getContext());
+		// The horizontal scroll bar is not always visible (due to vertical scroll), it is better to hide it definitively.
+		mHorizontalScrollView.setHorizontalScrollBarEnabled(false);
+		mHorizontalScrollView.setOverScrollMode(OVER_SCROLL_NEVER);
+		
 		mFinalFrame = new FrameLayout(getContext());
 		
 		mVerticalScrollView.addView(mIntermediateFrame);
@@ -109,7 +117,12 @@ public class XYScrollView extends FrameLayout{
 	}
 	
 	
-	/**** Scroll listener ****/
+	/**** Scroll listener **** 
+	 * There is not OnScrollChanged Listener in the
+	 * standard android library. We add it to join the scroll
+	 * position of both VerticalScrollView and HorizontalScrollView
+	 * in one tool.
+	 **/
 	
 	/** Store the scroll position **/
 	private int scrollX = 0, scrollY = 0;
