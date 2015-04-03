@@ -11,7 +11,10 @@ import android.widget.ScrollView;
 
 /**
  * An awesome horizontal and vertical ScrollView based
- * on android's default views.
+ * on android's default views. It can contain only one child
+ * as for the android default ScrollView.
+ * 
+ * API requirement : This view requires at least the API level 3 (Android 1.5)
  * 
  * @author Proïd
  *
@@ -25,18 +28,17 @@ public class XYScrollView extends FrameLayout{
 	 * override the onInterceptTouchEvent methods to handle the event
 	 * as we wish.
 	 * 
-	 * Structure :
+	 * View's structure :
 	 *  VerticalScrollView {
 	 * 		FrameLayoutItermediate {
 	 * 			HorizontalScrollView {
 	 * 				FrameLayout {
-	 * 					[Content ViewGroup]
+	 * 					[User's content]
 	 * 				}
 	 * 			}
 	 * 		}
 	 *  }
 	 *  
-	 *  TODO : implement onScroll
 	 */
 	
 	/** For horizontal scroll */
@@ -49,20 +51,43 @@ public class XYScrollView extends FrameLayout{
 	MyFrameLayoutIntermediate mIntermediateFrame;
 	
 	
+	/** Constructor calling initScrolls(). The constructor with 2
+	 * params will be call when the view is loaded from a xml file **/
+	
+	public XYScrollView(Context context) {
+		super(context);
+		initStructure();
+	}
+	public XYScrollView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		initStructure();
+	}
+	public XYScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
+		super(context, attrs, defStyleAttr);
+		initStructure();
+	}
+	
 	/** Build the structure of the view with the personnalized views **/
-	private void initScrolls() {
+	private void initStructure() {
 		mVerticalScrollView = new MyVerticalScrollView(getContext());
-		mVerticalScrollView.setVerticalScrollBarEnabled(false);
-		mVerticalScrollView.setOverScrollMode(OVER_SCROLL_NEVER);
 		
 		mIntermediateFrame = new MyFrameLayoutIntermediate(getContext());
 		
 		mHorizontalScrollView = new MyHorizontalScrollView(getContext());
-		// The horizontal scroll bar is not always visible (due to vertical scroll), it is better to hide it definitively.
-		mHorizontalScrollView.setHorizontalScrollBarEnabled(false);
-		mHorizontalScrollView.setOverScrollMode(OVER_SCROLL_NEVER);
 		
 		mFinalFrame = new FrameLayout(getContext());
+		
+		/** The horizontal scroll bar is not always visible (due to vertical
+		 scroll), it is better to hide it definitively. **/
+		mHorizontalScrollView.setHorizontalScrollBarEnabled(false);
+		mVerticalScrollView.setVerticalScrollBarEnabled(false);
+		
+		/** For the same reason, we can disable the over scroll effect.
+		 However, we need the minimum API level requirement to be increase to level 9
+		 You can uncomment this lines if you use an API level greater or equal to 9 **/
+		//mHorizontalScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+		//mVerticalScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+		
 		
 		mVerticalScrollView.addView(mIntermediateFrame);
 		mIntermediateFrame.addView(mHorizontalScrollView);
@@ -71,22 +96,6 @@ public class XYScrollView extends FrameLayout{
 		// Call the super addView method. The local method is no longer available
 		super.addView(mVerticalScrollView, 0,
 				new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-	}
-	
-	/** Constructor calling initScrolls(). The constructor with 2
-	 * params will be call when the view is loaded from a xml file **/
-	
-	public XYScrollView(Context context) {
-		super(context);
-		initScrolls();
-	}
-	public XYScrollView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		initScrolls();
-	}
-	public XYScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
-		super(context, attrs, defStyleAttr);
-		initScrolls();
 	}
 	
 	/**
@@ -115,43 +124,6 @@ public class XYScrollView extends FrameLayout{
 	public void addView(View child, android.view.ViewGroup.LayoutParams params) {
 		mFinalFrame.addView(child, params);
 	}
-	
-	
-	/**** Scroll listener **** 
-	 * There is not OnScrollChanged Listener in the
-	 * standard android library. We add it to join the scroll
-	 * position of both VerticalScrollView and HorizontalScrollView
-	 * in one tool.
-	 **/
-	
-	/** Store the scroll position **/
-	private int scrollX = 0, scrollY = 0;
-	
-	/** The listener given by the user **/
-	OnScrollChangedListener scrollListener;
-	
-	/** Set the scroll changed listener **/
-	public void setOnScrollChangedListener(OnScrollChangedListener scrollListener) {
-		this.scrollListener = scrollListener;
-	}
-	
-	/** Call by the HorizontalScrollView when its scroll position has changed **/
-	private void onScrollXChanged(int x) {
-		if(scrollListener != null)
-			scrollListener.onScrollChanged(x, scrollY, scrollX, scrollY);
-	}
-	
-	/** Call by the VerticalScrollView when its scroll position has changed **/
-	private void onScrollYChanged(int y) {
-		if(scrollListener != null)
-			scrollListener.onScrollChanged(scrollX, y, scrollX, scrollY);
-	}
-	
-	/** An interface that give an access to the scroll's change **/
-	public interface OnScrollChangedListener {
-		public void onScrollChanged(int x, int y, int oldX, int oldY);
-	}
-	
 	
 	/**** Event handling ****/
 	
@@ -199,12 +171,6 @@ public class XYScrollView extends FrameLayout{
 			return r;
 		}
 		
-		// TODO
-		@Override
-		protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-			super.onScrollChanged(l, t, oldl, oldt);
-			XYScrollView.this.onScrollYChanged(t);
-		}
 	}
 	
 	/** This personnalized frameView will just stop the propagations of the events **/
@@ -239,13 +205,6 @@ public class XYScrollView extends FrameLayout{
 			boolean r = super.onInterceptTouchEvent(ev) || cancelRequest;
 			cancelRequest = false;
 			return r;
-		}
-		
-		// TODO
-		@Override
-		protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-			super.onScrollChanged(l, t, oldl, oldt);
-			XYScrollView.this.onScrollXChanged(l);
 		}
 	}
 	
