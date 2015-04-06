@@ -173,7 +173,7 @@ public class IXYScrollView extends FrameLayout {
 	OnOverScrollListener overScrollListener;
 	
 	/** Set the over scroll listener **/
-	public void setOnScrollChangedListener(OnOverScrollListener overscrollListener) {
+	public void setOnOverScrollListener(OnOverScrollListener overscrollListener) {
 		this.overScrollListener = overscrollListener;
 	}
 	
