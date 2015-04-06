@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
@@ -84,6 +85,7 @@ public class IXYScrollView extends FrameLayout {
 		 scroll), it is better to hide it definitively. **/
 		mHorizontalScrollView.setHorizontalScrollBarEnabled(false);
 		mVerticalScrollView.setVerticalScrollBarEnabled(false);
+
 		
 		/** For the same reason, we can disable the over scroll effect.
 		 However, we need the minimum API level requirement to be increase to level 9 **/
@@ -164,53 +166,6 @@ public class IXYScrollView extends FrameLayout {
 		public void onScrollChanged(int x, int y, int oldX, int oldY);
 	}
 	
-
-	/**** Over scroll listener ***
-	 * Same as scroll listener...
-	 **/
-	
-	/** The listener given by the user **/
-	OnOverScrollListener overScrollListener;
-	
-	/** Set the over scroll listener **/
-	public void setOnOverScrollListener(OnOverScrollListener overscrollListener) {
-		this.overScrollListener = overscrollListener;
-	}
-	
-	/** Call by the HorizontalScrollView when over scroll occurs **/
-	private void onOverScrollXBy(int dx, int scrollX, int scrollY,
-			int scrollRangeX, int scrollRangeY, int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
-		if(overScrollListener != null)
-			overScrollListener.onOverScrollBy(dx, 0, scrollX, scrollY,
-					scrollRangeX, scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
-	}
-	
-	/** Call by the VerticalScrollView when over scroll occurs **/
-	private void onOverScrollYBy(int dy, int scrollX, int scrollY,
-			int scrollRangeX, int scrollRangeY, int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
-		if(overScrollListener != null)
-			overScrollListener.onOverScrollBy(0, dy, scrollX, scrollY,
-					scrollRangeX, scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
-	}
-	
-	/** An interface that gives an access to the over scroll motion **/
-	public interface OnOverScrollListener {
-		/**
-		 * @param deltaX Change in X in pixels
-		 * @param deltaY Change in Y in pixels
-		 * @param scrollX Current X scroll value in pixels before applying deltaX
-		 * @param scrollY Current Y scroll value in pixels before applying deltaY
-		 * @param scrollRangeX Maximum content scroll range along the X axis
-		 * @param scrollRangeY Maximum content scroll range along the Y axis
-		 * @param maxOverScrollX Number of pixels to overscroll by in either direction along the X axis.
-		 * @param maxOverScrollY Number of pixels to overscroll by in either direction along the Y axis.
-		 * @param isTouchEvent true if this scroll operation is the result of a touch event
-		 */
-		public void onOverScrollBy(int deltaX, int deltaY, int scrollX,
-				int scrollY, int scrollRangeX, int scrollRangeY,
-				int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent);
-	}
-	
 	
 	/**** Event handling ****/
 	
@@ -247,6 +202,12 @@ public class IXYScrollView extends FrameLayout {
 	private class MyVerticalScrollView extends ScrollView {
 		public MyVerticalScrollView(Context context) {
 			super(context);
+			getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+				@Override
+				public void onScrollChanged() {
+					onScrollYChanged(getScrollY());
+				}
+			});
 		}
 		
 		/** The scroll view intercept the events when they are intented to do scroll motion **/
@@ -256,23 +217,6 @@ public class IXYScrollView extends FrameLayout {
 			// Going to scroll mode, request child's event handling cancelation
 			if(r) cancelRequest = true;
 			return r;
-		}
-		
-		@Override
-		protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-			super.onScrollChanged(l, t, oldl, oldt);
-			IXYScrollView.this.onScrollYChanged(t);
-		}
-		@Override
-		protected boolean overScrollBy(int deltaX, int deltaY, int scrollX,
-				int scrollY, int scrollRangeX, int scrollRangeY,
-				int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
-
-			IXYScrollView.this.onOverScrollYBy(deltaY, scrollX, scrollY,
-					scrollRangeX, scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
-					
-			return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX,
-					scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
 		}
 	}
 	
@@ -299,6 +243,12 @@ public class IXYScrollView extends FrameLayout {
 	private class MyHorizontalScrollView extends HorizontalScrollView {
 		public MyHorizontalScrollView(Context context) {
 			super(context);
+			getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+				@Override
+				public void onScrollChanged() {
+					onScrollXChanged(getScrollX());
+				}
+			});
 		}
 		
 		/** We let the super method intercept the event if needed. We also intercept
@@ -308,24 +258,6 @@ public class IXYScrollView extends FrameLayout {
 			boolean r = super.onInterceptTouchEvent(ev) || cancelRequest;
 			cancelRequest = false;
 			return r;
-		}
-		
-		@Override
-		protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-			super.onScrollChanged(l, t, oldl, oldt);
-			IXYScrollView.this.onScrollXChanged(l);
-		}
-		
-		@Override
-		protected boolean overScrollBy(int deltaX, int deltaY, int scrollX,
-				int scrollY, int scrollRangeX, int scrollRangeY,
-				int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
-
-			IXYScrollView.this.onOverScrollXBy(deltaX, scrollX, scrollY,
-					scrollRangeX, scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
-					
-			return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX,
-					scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
 		}
 	}
 }
