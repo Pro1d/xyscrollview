@@ -166,6 +166,11 @@ public class IXYScrollView extends FrameLayout {
 		public void onScrollChanged(int x, int y, int oldX, int oldY);
 	}
 	
+	/** We override this method to give the possibility to change the scroll position manually **/
+	public void scrollTo(int x, int y) {
+		mHorizontalScrollView.scrollTo(x, 0);
+		mVerticalScrollView.scrollTo(0, y);
+	}
 	
 	/**** Event handling ****/
 	
