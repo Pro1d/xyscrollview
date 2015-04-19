@@ -151,12 +151,14 @@ public class IXYScrollView extends FrameLayout {
 	
 	/** Call by the HorizontalScrollView when its scroll position has changed **/
 	private void onScrollXChanged(int x) {
+		scrollX = x;
 		if(scrollListener != null)
 			scrollListener.onScrollChanged(x, scrollY, scrollX, scrollY);
 	}
 	
 	/** Call by the VerticalScrollView when its scroll position has changed **/
 	private void onScrollYChanged(int y) {
+		scrollY = y;
 		if(scrollListener != null)
 			scrollListener.onScrollChanged(scrollX, y, scrollX, scrollY);
 	}
